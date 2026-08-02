@@ -62,6 +62,15 @@ export function filterByLabel(issues, label) {
   );
 }
 
+export function topPriority(issues, count) {
+  const limit = Math.max(0, Math.trunc(Number(count)) || 0);
+  return [...issues]
+    .map((issue) => ({ issue, score: scoreIssue(issue) }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(({ issue }) => issue);
+}
+
 export function paginate(items, page, perPage) {
   const parsedPage = Math.trunc(Number(page));
   const parsedPerPage = Math.trunc(Number(perPage));
