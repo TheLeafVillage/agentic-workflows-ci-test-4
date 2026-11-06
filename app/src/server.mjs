@@ -21,8 +21,7 @@ app.get('/api/issues', (request, response) => {
   });
 });
 
-// Must be registered before /:id — Express matches in order, so /:id would
-// otherwise capture "summary" as the id param and 404 it as a missing issue.
+// Registered before /:id so Express doesn't match "summary" as the id param.
 app.get('/api/issues/summary', (_request, response) => {
   response.json(summarizeIssues(issues));
 });

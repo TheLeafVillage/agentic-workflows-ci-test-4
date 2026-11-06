@@ -62,15 +62,10 @@ export function filterByLabel(issues, label) {
   );
 }
 
-/**
- * Summarizes issues as a total count plus per-label issue counts.
- * Each label is normalized (trim + lowercase) and counted at most once per issue.
- */
 export function summarizeIssues(issues) {
-  const list = Array.isArray(issues) ? issues : [];
   const labelCounts = new Map();
 
-  for (const issue of list) {
+  for (const issue of issues) {
     const rawLabels = Array.isArray(issue?.labels) ? issue.labels : [];
 
     for (const rawLabel of rawLabels) {
@@ -82,7 +77,7 @@ export function summarizeIssues(issues) {
   }
 
   return {
-    total: list.length,
+    total: issues.length,
     labels: Object.fromEntries(labelCounts)
   };
 }
