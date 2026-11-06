@@ -68,11 +68,16 @@ export function summarizeIssues(issues) {
   for (const issue of issues) {
     const rawLabels = Array.isArray(issue?.labels) ? issue.labels : [];
 
+    const normalizedLabels = new Set();
     for (const rawLabel of rawLabels) {
       const normalized = normalizeLabel(rawLabel);
       if (normalized) {
-        labelCounts.set(normalized, (labelCounts.get(normalized) ?? 0) + 1);
+        normalizedLabels.add(normalized);
       }
+    }
+
+    for (const normalized of normalizedLabels) {
+      labelCounts.set(normalized, (labelCounts.get(normalized) ?? 0) + 1);
     }
   }
 
