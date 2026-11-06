@@ -62,6 +62,14 @@ export function filterByLabel(issues, label) {
   );
 }
 
+export function filterByMinimumScore(issues, minScore) {
+  if (minScore === undefined) {
+    return [...issues];
+  }
+
+  return issues.filter((issue) => scoreIssue(issue) > minScore);
+}
+
 export function topPriority(issues, count) {
   const limit = Math.max(0, Math.trunc(Number(count)) || 0);
   return [...issues]

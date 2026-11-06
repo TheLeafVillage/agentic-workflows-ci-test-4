@@ -1,16 +1,33 @@
 import express from 'express';
 import { issues } from './data.mjs';
-import { filterByLabel, paginate, sortByPriority } from './domain.mjs';
+import { filterByLabel, filterByMinimumScore, paginate, sortByPriority } from './domain.mjs';
 
 export const app = express();
+
+// Empty/whitespace strings must stay rejected; Number('') is 0, not NaN.
+function parseMinScore(rawValue) {
+  const trimmed = typeof rawValue === 'string' ? rawValue.trim() : '';
+  return trimmed === '' ? NaN : Number(trimmed);
+}
 
 app.get('/health', (_request, response) => {
   response.json({ status: 'ok' });
 });
 
 app.get('/api/issues', (request, response) => {
-  const { label, page = '1', perPage = '10' } = request.query;
-  const filteredIssues = label ? filterByLabel(issues, label) : [...issues];
+  const { label, minScore, page = '1', perPage = '10' } = request.query;
+  const labelFilteredIssues = label ? filterByLabel(issues, label) : [...issues];
+
+  let filteredIssues = labelFilteredIssues;
+  if (minScore !== undefined) {
+    const parsedMinScore = parseMinScore(minScore);
+    if (!Number.isFinite(parsedMinScore) || parsedMinScore < 0) {
+      response.status(400).json({ error: 'minScore must be a finite number greater than or equal to 0' });
+      return;
+    }
+    filteredIssues = filterByMinimumScore(labelFilteredIssues, parsedMinScore);
+  }
+
   const prioritizedIssues = sortByPriority(filteredIssues);
 
   response.json({
