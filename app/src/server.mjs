@@ -1,6 +1,6 @@
 import express from 'express';
 import { issues } from './data.mjs';
-import { filterByLabel, paginate, sortByPriority } from './domain.mjs';
+import { filterByLabel, paginate, sortByCreatedAt, sortByPriority } from './domain.mjs';
 
 export const app = express();
 
@@ -9,15 +9,24 @@ app.get('/health', (_request, response) => {
 });
 
 app.get('/api/issues', (request, response) => {
-  const { label, page = '1', perPage = '10' } = request.query;
+  const { label, sort, page = '1', perPage = '10' } = request.query;
+
+  if (sort !== undefined && (typeof sort !== 'string' || !['priority', 'newest', 'oldest'].includes(sort))) {
+    response.status(400).json({ error: 'Invalid sort option' });
+    return;
+  }
+
   const filteredIssues = label ? filterByLabel(issues, label) : [...issues];
-  const prioritizedIssues = sortByPriority(filteredIssues);
+  const sortedIssues =
+    sort === 'newest' || sort === 'oldest'
+      ? sortByCreatedAt(filteredIssues, sort)
+      : sortByPriority(filteredIssues);
 
   response.json({
-    issues: paginate(prioritizedIssues, page, perPage),
+    issues: paginate(sortedIssues, page, perPage),
     page: Math.max(1, Math.trunc(Number(page) || 1)),
     perPage: Math.max(1, Math.trunc(Number(perPage) || 10)),
-    total: prioritizedIssues.length
+    total: sortedIssues.length
   });
 });
 

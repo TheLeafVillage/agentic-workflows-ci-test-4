@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { filterByLabel, paginate, scoreIssue, sortByPriority, topPriority } from '../src/domain.mjs';
+import { filterByLabel, paginate, scoreIssue, sortByCreatedAt, sortByPriority, topPriority } from '../src/domain.mjs';
 
 const fixtures = [
   {
@@ -67,6 +67,37 @@ describe('sortByPriority', () => {
     const originalOrder = fixtures.map((issue) => issue.id);
 
     sortByPriority(fixtures);
+
+    assert.deepEqual(fixtures.map((issue) => issue.id), originalOrder);
+  });
+});
+
+describe('sortByCreatedAt', () => {
+  it('orders issues from newest to oldest', () => {
+    assert.deepEqual(
+      sortByCreatedAt(fixtures, 'newest').map((issue) => issue.id),
+      ['docs', 'security', 'critical-bug', 'stale-help']
+    );
+  });
+
+  it('orders issues from oldest to newest', () => {
+    assert.deepEqual(
+      sortByCreatedAt(fixtures, 'oldest').map((issue) => issue.id),
+      ['stale-help', 'critical-bug', 'security', 'docs']
+    );
+  });
+
+  it('sorts issues with invalid dates last', () => {
+    const withInvalidDate = [...fixtures, { id: 'bad-date', createdAt: 'not-a-date' }];
+
+    assert.equal(sortByCreatedAt(withInvalidDate, 'newest').at(-1).id, 'bad-date');
+    assert.equal(sortByCreatedAt(withInvalidDate, 'oldest').at(-1).id, 'bad-date');
+  });
+
+  it('does not mutate the input array', () => {
+    const originalOrder = fixtures.map((issue) => issue.id);
+
+    sortByCreatedAt(fixtures, 'newest');
 
     assert.deepEqual(fixtures.map((issue) => issue.id), originalOrder);
   });

@@ -49,6 +49,25 @@ export function sortByPriority(issues) {
     .map(({ issue }) => issue);
 }
 
+export function sortByCreatedAt(issues, direction) {
+  const multiplier = direction === 'oldest' ? -1 : 1;
+
+  return issues
+    .map((issue) => ({ issue, time: Date.parse(issue?.createdAt) }))
+    .sort((a, b) => {
+      const aInvalid = Number.isNaN(a.time);
+      const bInvalid = Number.isNaN(b.time);
+
+      // Invalid dates always sort last, regardless of direction.
+      if (aInvalid || bInvalid) {
+        return aInvalid === bInvalid ? 0 : aInvalid ? 1 : -1;
+      }
+
+      return (a.time - b.time) * multiplier;
+    })
+    .map(({ issue }) => issue);
+}
+
 export function filterByLabel(issues, label) {
   const target = normalizeLabel(label);
   if (!target) {
