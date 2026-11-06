@@ -36,7 +36,7 @@ safe-outputs:
     draft: false
     preserve-branch-name: true
     allowed-files:
-      - "app/src/domain.mjs"
+      - "app/**"
     allowed-base-branches:
       - "**"
       - "!main"
@@ -62,10 +62,9 @@ Reproduce the failure with:
 cd app && npm test
 ```
 
-Read the failing assertion carefully. Find the smallest source fix needed in
-`app/src/domain.mjs`, make that fix, and avoid unrelated changes, refactors,
-formatting, dependency updates, or generated-file edits. Run `cd app && npm test`
-again to verify the fix.
+Read the failing assertion carefully. Find the smallest fix needed in `app/`
+and avoid unrelated changes or refactors. Do not change tests merely to hide a
+failure. Run `cd app && npm test` again to verify the fix.
 
 Open the fix with the `create-pull-request` safe output as a stacked pull request:
 
