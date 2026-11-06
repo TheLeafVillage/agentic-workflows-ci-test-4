@@ -23,6 +23,10 @@ permissions:
 
 engine: copilot
 
+# Safe-output bundle imports need the feature branch's base history.
+checkout:
+  fetch-depth: 0
+
 steps:
   - name: Checkout the failing branch
     uses: actions/checkout@v7
