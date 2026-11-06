@@ -10,7 +10,10 @@ on:
     workflows: ["CI"]
     types: [completed]
 
-if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'failure'
+if: >-
+  github.event_name == 'workflow_dispatch' ||
+  (github.event.workflow_run.conclusion == 'failure' &&
+  github.event.workflow_run.head_repository.full_name == github.repository)
 
 permissions:
   contents: read
@@ -31,6 +34,8 @@ safe-outputs:
   create-pull-request:
     draft: false
     preserve-branch-name: true
+    allowed-files:
+      - "app/src/domain.mjs"
     allowed-base-branches:
       - "**"
       - "!main"
