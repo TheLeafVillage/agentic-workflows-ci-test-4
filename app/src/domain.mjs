@@ -50,16 +50,20 @@ export function sortByPriority(issues) {
 }
 
 export function filterByLabel(issues, label) {
-  const target = normalizeLabel(label);
-  if (!target) {
+  // Comma-separated labels OR-match; trimmed, case-insensitive, empty tokens ignored.
+  const targets = String(label ?? '')
+    .split(',')
+    .map((token) => normalizeLabel(token))
+    .filter(Boolean);
+
+  if (targets.length === 0) {
     return [...issues];
   }
 
-  return issues.filter((issue) =>
-    (Array.isArray(issue.labels) ? issue.labels : []).some(
-      (issueLabel) => normalizeLabel(issueLabel) === target
-    )
-  );
+  return issues.filter((issue) => {
+    const normalizedIssueLabels = (Array.isArray(issue.labels) ? issue.labels : []).map(normalizeLabel);
+    return targets.every((target) => normalizedIssueLabels.includes(target));
+  });
 }
 
 export function topPriority(issues, count) {
