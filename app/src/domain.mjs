@@ -62,6 +62,15 @@ export function filterByLabel(issues, label) {
   );
 }
 
+export function searchIssues(issues, query) {
+  const target = String(query ?? '').trim().toLowerCase();
+  if (!target) {
+    return [...issues];
+  }
+
+  return issues.filter((issue) => String(issue?.title ?? '').includes(target));
+}
+
 export function topPriority(issues, count) {
   const limit = Math.max(0, Math.trunc(Number(count)) || 0);
   return [...issues]

@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { filterByLabel, paginate, scoreIssue, sortByPriority, topPriority } from '../src/domain.mjs';
+import {
+  filterByLabel,
+  paginate,
+  scoreIssue,
+  searchIssues,
+  sortByPriority,
+  topPriority
+} from '../src/domain.mjs';
 
 const fixtures = [
   {
@@ -99,6 +106,59 @@ describe('topPriority', () => {
       ['critical-bug', 'security'],
       'topPriority should list issues from highest score to lowest score'
     );
+  });
+});
+
+describe('searchIssues', () => {
+  const searchFixtures = [
+    {
+      id: 'uppercase-title',
+      title: 'URGENT DEPLOYMENT NOTES',
+      labels: [],
+      reactions: 0,
+      comments: 0,
+      createdAt: '2026-05-01T00:00:00.000Z'
+    },
+    {
+      id: 'other',
+      title: 'Webhook signature check fails intermittently',
+      labels: [],
+      reactions: 0,
+      comments: 0,
+      createdAt: '2026-05-01T00:00:00.000Z'
+    }
+  ];
+
+  it('matches an uppercase title against a lowercase query substring', () => {
+    assert.deepEqual(
+      searchIssues(searchFixtures, 'deployment').map((issue) => issue.id),
+      ['uppercase-title']
+    );
+  });
+
+  it('trims surrounding whitespace before matching', () => {
+    assert.deepEqual(
+      searchIssues(searchFixtures, '  webhook  ').map((issue) => issue.id),
+      ['other']
+    );
+  });
+
+  it('returns a new copy of all issues for a blank or omitted query', () => {
+    const blankResult = searchIssues(searchFixtures, '   ');
+    const omittedResult = searchIssues(searchFixtures, undefined);
+
+    assert.deepEqual(blankResult, searchFixtures);
+    assert.notEqual(blankResult, searchFixtures);
+    assert.deepEqual(omittedResult, searchFixtures);
+    assert.notEqual(omittedResult, searchFixtures);
+  });
+
+  it('does not mutate the input array', () => {
+    const originalOrder = searchFixtures.map((issue) => issue.id);
+
+    searchIssues(searchFixtures, 'deployment');
+
+    assert.deepEqual(searchFixtures.map((issue) => issue.id), originalOrder);
   });
 });
 
