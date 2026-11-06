@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { filterByLabel, paginate, scoreIssue, sortByPriority, topPriority } from '../src/domain.mjs';
+import {
+  filterByLabel,
+  filterByMinimumScore,
+  paginate,
+  scoreIssue,
+  sortByPriority,
+  topPriority
+} from '../src/domain.mjs';
 
 const fixtures = [
   {
@@ -89,6 +96,31 @@ describe('filterByLabel', () => {
 
   it('returns an empty array when no issues match', () => {
     assert.deepEqual(filterByLabel(fixtures, 'question'), []);
+  });
+});
+
+describe('filterByMinimumScore', () => {
+  it('includes a score exactly at the threshold and above, excludes scores below it', () => {
+    // security scores exactly 118, the chosen threshold; critical-bug is above, docs/stale-help are below.
+    assert.deepEqual(
+      filterByMinimumScore(fixtures, 118).map((issue) => issue.id),
+      ['critical-bug', 'security']
+    );
+  });
+
+  it('returns a new copy of all issues when minScore is omitted', () => {
+    const result = filterByMinimumScore(fixtures);
+
+    assert.deepEqual(result, fixtures);
+    assert.notEqual(result, fixtures);
+  });
+
+  it('does not mutate the input array', () => {
+    const originalOrder = fixtures.map((issue) => issue.id);
+
+    filterByMinimumScore(fixtures, 50);
+
+    assert.deepEqual(fixtures.map((issue) => issue.id), originalOrder);
   });
 });
 
