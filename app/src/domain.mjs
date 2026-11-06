@@ -67,7 +67,7 @@ export function filterByMinimumScore(issues, minScore) {
     return [...issues];
   }
 
-  return issues.filter((issue) => scoreIssue(issue) > minScore);
+  return issues.filter((issue) => scoreIssue(issue) >= minScore);
 }
 
 export function topPriority(issues, count) {
