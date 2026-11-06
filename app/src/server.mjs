@@ -1,6 +1,6 @@
 import express from 'express';
 import { issues } from './data.mjs';
-import { filterByLabel, paginate, sortByPriority } from './domain.mjs';
+import { filterByLabel, paginate, searchIssues, sortByPriority } from './domain.mjs';
 
 export const app = express();
 
@@ -9,9 +9,16 @@ app.get('/health', (_request, response) => {
 });
 
 app.get('/api/issues', (request, response) => {
-  const { label, page = '1', perPage = '10' } = request.query;
+  const { label, q, page = '1', perPage = '10' } = request.query;
+
+  if (q !== undefined && typeof q !== 'string') {
+    response.status(400).json({ error: 'q must be a single text value' });
+    return;
+  }
+
   const filteredIssues = label ? filterByLabel(issues, label) : [...issues];
-  const prioritizedIssues = sortByPriority(filteredIssues);
+  const searchedIssues = searchIssues(filteredIssues, q);
+  const prioritizedIssues = sortByPriority(searchedIssues);
 
   response.json({
     issues: paginate(prioritizedIssues, page, perPage),
