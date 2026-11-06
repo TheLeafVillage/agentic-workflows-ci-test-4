@@ -10,6 +10,13 @@ app.get('/health', (_request, response) => {
 
 app.get('/api/issues', (request, response) => {
   const { label, page = '1', perPage = '10' } = request.query;
+
+  // Express parses repeated/bracketed `label` params as array/object; reject non-string values here.
+  if (label !== undefined && typeof label !== 'string') {
+    response.status(400).json({ error: 'label must be a single string value' });
+    return;
+  }
+
   const filteredIssues = label ? filterByLabel(issues, label) : [...issues];
   const prioritizedIssues = sortByPriority(filteredIssues);
 

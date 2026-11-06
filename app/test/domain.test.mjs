@@ -90,6 +90,27 @@ describe('filterByLabel', () => {
   it('returns an empty array when no issues match', () => {
     assert.deepEqual(filterByLabel(fixtures, 'question'), []);
   });
+
+  it('OR-matches issues against any of several comma-separated labels', () => {
+    assert.deepEqual(
+      filterByLabel(fixtures, 'bug,help wanted').map((issue) => issue.id),
+      ['critical-bug', 'stale-help']
+    );
+  });
+
+  it('trims whitespace and ignores case across comma-separated labels', () => {
+    assert.deepEqual(
+      filterByLabel(fixtures, ' BUG , Help Wanted ').map((issue) => issue.id),
+      ['critical-bug', 'stale-help']
+    );
+  });
+
+  it('ignores empty tokens between commas', () => {
+    assert.deepEqual(
+      filterByLabel(fixtures, 'bug,,help wanted,').map((issue) => issue.id),
+      ['critical-bug', 'stale-help']
+    );
+  });
 });
 
 describe('topPriority', () => {
