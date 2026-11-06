@@ -62,7 +62,7 @@ export function filterByLabel(issues, label) {
 
   return issues.filter((issue) => {
     const normalizedIssueLabels = (Array.isArray(issue.labels) ? issue.labels : []).map(normalizeLabel);
-    return targets.every((target) => normalizedIssueLabels.includes(target));
+    return targets.some((target) => normalizedIssueLabels.includes(target));
   });
 }
 
