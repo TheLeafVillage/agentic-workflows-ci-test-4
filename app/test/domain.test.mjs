@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { filterByLabel, paginate, scoreIssue, sortByPriority, topPriority } from '../src/domain.mjs';
+import { filterByLabel, paginate, scoreIssue, sortByPriority, summarizeIssues, topPriority } from '../src/domain.mjs';
 
 const fixtures = [
   {
@@ -113,5 +113,51 @@ describe('paginate', () => {
 
   it('normalizes invalid page and perPage values', () => {
     assert.deepEqual(paginate(['a', 'b', 'c'], 0, 0), ['a']);
+  });
+});
+
+describe('summarizeIssues', () => {
+  it('counts repeated label casings on one issue only once', () => {
+    const issue = { id: 'cased-labels', labels: ['Bug', 'bug', ' BUG '] };
+
+    const summary = summarizeIssues([issue]);
+
+    assert.equal(summary.total, 1);
+    assert.deepEqual(summary.labels, { bug: 1 });
+  });
+
+  it('aggregates normalized label counts across multiple issues', () => {
+    const summary = summarizeIssues(fixtures);
+
+    assert.equal(summary.total, fixtures.length);
+    assert.deepEqual(summary.labels, {
+      bug: 1,
+      critical: 1,
+      documentation: 1,
+      security: 1,
+      regression: 1,
+      'help wanted': 1
+    });
+  });
+
+  it('ignores empty, blank, and missing labels', () => {
+    const summary = summarizeIssues([
+      { id: 'no-labels' },
+      { id: 'empty-labels', labels: [] },
+      { id: 'blank-labels', labels: ['', '   ', null, undefined] }
+    ]);
+
+    assert.equal(summary.total, 3);
+    assert.deepEqual(summary.labels, {});
+  });
+
+  it('does not mutate issues or their label arrays', () => {
+    const issue = { id: 'immutable', labels: ['Bug', 'bug'] };
+    const originalLabelsRef = issue.labels;
+
+    summarizeIssues([issue]);
+
+    assert.equal(issue.labels, originalLabelsRef);
+    assert.deepEqual(issue.labels, ['Bug', 'bug']);
   });
 });

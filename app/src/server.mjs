@@ -1,6 +1,6 @@
 import express from 'express';
 import { issues } from './data.mjs';
-import { filterByLabel, paginate, sortByPriority } from './domain.mjs';
+import { filterByLabel, paginate, sortByPriority, summarizeIssues } from './domain.mjs';
 
 export const app = express();
 
@@ -19,6 +19,12 @@ app.get('/api/issues', (request, response) => {
     perPage: Math.max(1, Math.trunc(Number(perPage) || 10)),
     total: prioritizedIssues.length
   });
+});
+
+// Must be registered before /:id — Express matches in order, so /:id would
+// otherwise capture "summary" as the id param and 404 it as a missing issue.
+app.get('/api/issues/summary', (_request, response) => {
+  response.json(summarizeIssues(issues));
 });
 
 app.get('/api/issues/:id', (request, response) => {
