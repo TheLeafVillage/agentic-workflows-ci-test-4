@@ -50,7 +50,7 @@ export function sortByPriority(issues) {
 }
 
 export function sortByCreatedAt(issues, direction) {
-  const multiplier = direction === 'oldest' ? -1 : 1;
+  const multiplier = direction === 'oldest' ? 1 : -1;
 
   return issues
     .map((issue) => ({ issue, time: Date.parse(issue?.createdAt) }))
