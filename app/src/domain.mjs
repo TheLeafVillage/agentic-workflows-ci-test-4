@@ -68,7 +68,7 @@ export function searchIssues(issues, query) {
     return [...issues];
   }
 
-  return issues.filter((issue) => String(issue?.title ?? '').includes(target));
+  return issues.filter((issue) => String(issue?.title ?? '').toLowerCase().includes(target));
 }
 
 export function topPriority(issues, count) {
