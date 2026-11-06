@@ -62,6 +62,26 @@ export function filterByLabel(issues, label) {
   );
 }
 
+export function summarizeIssues(issues) {
+  const labelCounts = new Map();
+
+  for (const issue of issues) {
+    const rawLabels = Array.isArray(issue?.labels) ? issue.labels : [];
+
+    for (const rawLabel of rawLabels) {
+      const normalized = normalizeLabel(rawLabel);
+      if (normalized) {
+        labelCounts.set(normalized, (labelCounts.get(normalized) ?? 0) + 1);
+      }
+    }
+  }
+
+  return {
+    total: issues.length,
+    labels: Object.fromEntries(labelCounts)
+  };
+}
+
 export function topPriority(issues, count) {
   const limit = Math.max(0, Math.trunc(Number(count)) || 0);
   return [...issues]
