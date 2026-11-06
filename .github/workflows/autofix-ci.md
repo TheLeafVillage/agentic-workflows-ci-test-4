@@ -31,6 +31,8 @@ safe-outputs:
   create-pull-request:
     draft: false
     preserve-branch-name: true
+    allowed-files:
+      - "app/src/domain.mjs"
     allowed-base-branches:
       - "**"
       - "!main"
